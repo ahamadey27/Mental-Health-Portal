@@ -1,0 +1,2 @@
+# Mental-Health-Portal
+prototype web application using ASP.NET Core Minimal APIs, local AI processing (ML.NET, Ollama with Semantic Kernel), and local storage (SQLite, File System, Lucene.NET) to manage, analyze, search, and query mental health provider documents. This project serves to validate core RAG functionality, test document handling, and evaluate the chosen technology stack for a potential future production system, prioritizing zero-cost and local processing for the prototype phase
