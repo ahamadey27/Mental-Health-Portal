@@ -85,14 +85,14 @@
 
 ## Phase 1: Project Setup & Core Document Handling
 - [ ] **Environment Setup:**
-    - [ ] Install .NET SDK (8.0 or higher).
-    - [ ] Install preferred IDE (Visual Studio / VS Code).
-    - [ ] Initialize Git repository for version control.
+    - [x] Install .NET SDK (8.0 or higher).
+    - [x] Install preferred IDE (Visual Studio / VS Code).
+    - [x] Initialize Git repository for version control.
 - [ ] **Project Initialization:**
-    - [ ] Create new ASP.NET Core project (e.g., "Empty" or "Web API" template for Minimal APIs).
-    - [ ] Set up basic project structure (e.g., `Endpoints`, `Services`, `Models`, `Data` folders).
+    - [x] Create new ASP.NET Core project (e.g., "Empty" or "Web API" template for Minimal APIs).
+    - [x] Set up basic project structure (e.g., `Endpoints`, `Services`, `Models`, `Data` folders).
 - [ ] **Document Upload Implementation:**
-    - [ ] Create basic UI for document upload (e.g., HTML form with `<input type="file">`, JavaScript for drag-and-drop).
+    - [x] Create basic UI for document upload (e.g., HTML form with `<input type="file">`, JavaScript for drag-and-drop).
     - [ ] Implement backend endpoint (e.g., dedicated MVC Controller or Razor Page handler) to receive `IFormFile` for PDF and DOCX files.
     - [ ] Implement logic for generating unique stored filenames and saving files to a configured local file system directory.
 - [ ] **Metadata Storage Setup:**
