@@ -84,17 +84,29 @@
 # Development Plan (MVP - Recommended Approach)
 
 ## Phase 1: Project Setup & Core Document Handling
-- [ ] **Environment Setup:**
+- [x] **Environment Setup:**
     - [x] Install .NET SDK (8.0 or higher).
     - [x] Install preferred IDE (Visual Studio / VS Code).
     - [x] Initialize Git repository for version control.
-- [ ] **Project Initialization:**
+- [x] **Project Initialization:**
     - [x] Create new ASP.NET Core project (e.g., "Empty" or "Web API" template for Minimal APIs).
     - [x] Set up basic project structure (e.g., `Endpoints`, `Services`, `Models`, `Data` folders).
-- [ ] **Document Upload Implementation:**
+- [x] **Document Upload Implementation:**
     - [x] Create basic UI for document upload (e.g., HTML form with `<input type="file">`, JavaScript for drag-and-drop).
-    - [ ] Implement backend endpoint (e.g., dedicated MVC Controller or Razor Page handler) to receive `IFormFile` for PDF and DOCX files.
-    - [ ] Implement logic for generating unique stored filenames and saving files to a configured local file system directory.
+    - [x] Implement backend endpoint (e.g., dedicated MVC Controller or Razor Page handler) to receive `IFormFile` for PDF and DOCX files.
+    - [x] Implement logic for generating unique stored filenames and saving files to a configured local file system directory.
+- [ ] **Testing PART 1:**
+    - [ ] **Test the File Upload:**
+        - [ ] On the `index.html` page, choose a small PDF or DOCX file using the "Choose document" input.
+        - [ ] Click the "Upload" button.
+        - [ ] Check for a success message on the webpage (e.g., "File 'yourfile.pdf' uploaded successfully and saved as 'unique-guid.pdf'.").
+        - [ ] Check your file system: Look in the `c:\\Users\\hamad\\Documents\\GitHub\\Mental-Health-Portal\\MentalHealthPortal\\UploadedDocuments` folder. The uploaded file (with its new unique name) should be there.
+        - [ ] **Check Browser Developer Tools (Optional but Recommended):**
+            - [ ] Press F12 in your browser to open developer tools.
+            - [ ] Go to the "Network" tab.
+            - [ ] Upload a file again. You should see a request to `/api/documents/upload`. Click on it to see the request details, headers, and the JSON response from your server. This is very helpful for debugging.
+        - [ ] **Check Application Output (Terminal/VS Output Window):**
+            - [ ] Look at the console output where `dotnet run` is executing (or the Visual Studio Output window). If there were errors during file saving, you should see the `Console.WriteLine` messages from your catch blocks in `DocumentUploadEndpoints.cs`.
 - [ ] **Metadata Storage Setup:**
     - [ ] Integrate Entity Framework Core with `Microsoft.EntityFrameworkCore.Sqlite`.
     - [ ] Define `DocumentMetadata.cs` entity model class with appropriate properties and validation attributes.
