@@ -1,4 +1,6 @@
 using MentalHealthPortal.Endpoints;
+using MentalHealthPortal.Data; // Add this using directive
+using Microsoft.EntityFrameworkCore; // Add this using directive
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +10,20 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.Services.AddRazorPages();
 // builder.Services.AddControllersWithViews();
 
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configure EF Core to use SQLite
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=mentalhealthportal.db";
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(connectionString));
+
+builder.Services.AddScoped<MentalHealthPortal.Services.TextExtractionService>(); // Register the TextExtractionService
+
 var app = builder.Build();
+
+
 
 if (app.Environment.IsDevelopment())
 {

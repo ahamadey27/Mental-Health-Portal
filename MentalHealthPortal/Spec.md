@@ -95,32 +95,32 @@
     - [x] Create basic UI for document upload (e.g., HTML form with `<input type="file">`, JavaScript for drag-and-drop).
     - [x] Implement backend endpoint (e.g., dedicated MVC Controller or Razor Page handler) to receive `IFormFile` for PDF and DOCX files.
     - [x] Implement logic for generating unique stored filenames and saving files to a configured local file system directory.
-- [ ] **Testing PART 1:**
-    - [ ] **Test the File Upload:**
-        - [ ] On the `index.html` page, choose a small PDF or DOCX file using the "Choose document" input.
-        - [ ] Click the "Upload" button.
-        - [ ] Check for a success message on the webpage (e.g., "File 'yourfile.pdf' uploaded successfully and saved as 'unique-guid.pdf'.").
-        - [ ] Check your file system: Look in the `c:\\Users\\hamad\\Documents\\GitHub\\Mental-Health-Portal\\MentalHealthPortal\\UploadedDocuments` folder. The uploaded file (with its new unique name) should be there.
-        - [ ] **Check Browser Developer Tools (Optional but Recommended):**
-            - [ ] Press F12 in your browser to open developer tools.
-            - [ ] Go to the "Network" tab.
-            - [ ] Upload a file again. You should see a request to `/api/documents/upload`. Click on it to see the request details, headers, and the JSON response from your server. This is very helpful for debugging.
+- [x] **Testing PART 1:**
+    - [x] **Test the File Upload:**
+        - [x] On the `index.html` page, choose a small PDF or DOCX file using the "Choose document" input.
+        - [x] Click the "Upload" button.
+        - [x] Check for a success message on the webpage (e.g., "File 'yourfile.pdf' uploaded successfully and saved as 'unique-guid.pdf'.").
+        - [x] Check your file system: Look in the `c:\\Users\\hamad\\Documents\\GitHub\\Mental-Health-Portal\\MentalHealthPortal\\UploadedDocuments` folder. The uploaded file (with its new unique name) should be there.
+        - [x] **Check Browser Developer Tools (Optional but Recommended):**
+            - [x] Press F12 in your browser to open developer tools.
+            - [x] Go to the "Network" tab.
+            - [x] Upload a file again. You should see a request to `/api/documents/upload`. Click on it to see the request details, headers, and the JSON response from your server. This is very helpful for debugging.
         - [ ] **Check Application Output (Terminal/VS Output Window):**
-            - [ ] Look at the console output where `dotnet run` is executing (or the Visual Studio Output window). If there were errors during file saving, you should see the `Console.WriteLine` messages from your catch blocks in `DocumentUploadEndpoints.cs`.
-- [ ] **Metadata Storage Setup:**
-    - [ ] Integrate Entity Framework Core with `Microsoft.EntityFrameworkCore.Sqlite`.
-    - [ ] Define `DocumentMetadata.cs` entity model class with appropriate properties and validation attributes.
-    - [ ] Create `ApplicationDbContext` inheriting from `DbContext`.
-    - [ ] Configure EF Core for SQLite connection in `appsettings.json` (or directly in `Program.cs` for simplicity).
-    - [ ] Add EF Core migrations to create the initial `DocumentMetadata` table.
-    - [ ] Apply migrations (`dotnet ef database update`).
-    - [ ] Implement service logic to save document metadata upon successful upload.
+            - [x] Look at the console output where `dotnet run` is executing (or the Visual Studio Output window). If there were errors during file saving, you should see the `Console.WriteLine` messages from your catch blocks in `DocumentUploadEndpoints.cs`.
+- [x] **Metadata Storage Setup:**
+    - [x] Integrate Entity Framework Core with Nuget Packages `Microsoft.EntityFrameworkCore.Sqlite` and 'Microsoft.EntityFrameworkCore.Design'
+    - [x] Define `DocumentMetadata.cs` entity model class with appropriate properties and validation attributes.
+    - [x] Create `ApplicationDbContext` inheriting from `DbContext`.
+    - [x] Configure EF Core for SQLite connection in `appsettings.json` (or directly in `Program.cs` for simplicity).
+    - [x] Add EF Core migrations to create the initial `DocumentMetadata` table.
+    - [x] Apply migrations (`dotnet ef database update`).
+    - [x] Implement service logic to save document metadata upon successful upload.
 
 ## Phase 2: Text Extraction & Search Implementation
 - [ ] **Text Extraction Integration:**
-    - [ ] Add NuGet packages: `PdfPig` and `DocX`.
-    - [ ] Implement a service to extract text content from uploaded PDF files using PdfPig.
-    - [ ] Implement a service to extract text content from uploaded DOCX files using DocX.
+    - [x] Add NuGet packages: `PdfPig` and `DocX`.
+    - [x] Implement a service to extract text content from uploaded PDF files using PdfPig.
+    - [x] Implement a service to extract text content from uploaded DOCX files using DocX.
     - [ ] Integrate text extraction into an asynchronous background process triggered after document upload and successful storage.
 - [ ] **Local Search Indexing Setup (Lucene.NET):**
     - [ ] Add NuGet package: `Lucene.Net`.
