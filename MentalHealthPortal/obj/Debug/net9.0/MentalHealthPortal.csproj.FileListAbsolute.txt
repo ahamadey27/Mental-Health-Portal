@@ -171,3 +171,6 @@ C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debu
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\J2N.dll
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.dll
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.Analysis.Common.dll
+C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.Queries.dll
+C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.QueryParser.dll
+C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.Sandbox.dll

@@ -10,6 +10,8 @@ using MentalHealthPortal.Models;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using Microsoft.Extensions.Logging; // Add for ILogger
+using Microsoft.AspNetCore.Hosting; // Add for IWebHostEnvironment
 
 namespace MentalHealthPortal.Services
 {
@@ -23,31 +25,42 @@ namespace MentalHealthPortal.Services
         private readonly string? _luceneIndexRootPathConfigValue;
 
         private readonly IndexWriter _writer;
+        private readonly ILogger<IndexService> _logger; // Add ILogger field
+        private readonly string _indexPath; // Store the resolved path
 
-        public IndexService(IConfiguration configuration)
+        // Modify constructor to inject ILogger and IWebHostEnvironment
+        public IndexService(IConfiguration configuration, ILogger<IndexService> logger, IWebHostEnvironment env)
         {
-            _luceneIndexRootPathConfigValue = configuration.GetValue<string?>("LuceneSettings:IndexRootPath");
+            _logger = logger;
+            string? configuredPath = configuration.GetValue<string?>("LuceneSettings:IndexRootPath");
 
-            string effectiveIndexRootPath;
-            if (string.IsNullOrEmpty(_luceneIndexRootPathConfigValue))
+            if (string.IsNullOrEmpty(configuredPath))
             {
-                effectiveIndexRootPath = Path.Combine("Data", "LuceneIndex_Default");
-                var defaultFullPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, effectiveIndexRootPath));
-                Console.WriteLine($"Warning: LuceneSettings:IndexRootPath not found in configuration. Using default: {defaultFullPath}");
+                _indexPath = Path.Combine(env.ContentRootPath, "Data", "LuceneIndex_Default");
+                _logger.LogWarning("LuceneSettings:IndexRootPath not found in configuration. Using default: {DefaultPath}", _indexPath);
             }
             else
             {
-                effectiveIndexRootPath = _luceneIndexRootPathConfigValue;
+                // Treat configuredPath as relative to ContentRootPath if it's not absolute
+                if (Path.IsPathRooted(configuredPath))
+                {
+                    _indexPath = configuredPath;
+                }
+                else
+                {
+                    _indexPath = Path.Combine(env.ContentRootPath, configuredPath);
+                }
             }
 
-            var fullIndexPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, effectiveIndexRootPath));
+            _logger.LogInformation("Lucene index configured at path: {IndexPath}", _indexPath);
 
-            if (!System.IO.Directory.Exists(fullIndexPath))
+            if (!System.IO.Directory.Exists(_indexPath))
             {
-                System.IO.Directory.CreateDirectory(fullIndexPath);
+                _logger.LogInformation("Creating Lucene index directory at: {IndexPath}", _indexPath);
+                System.IO.Directory.CreateDirectory(_indexPath);
             }
 
-            _indexDirectory = FSDirectory.Open(new DirectoryInfo(fullIndexPath));
+            _indexDirectory = FSDirectory.Open(new DirectoryInfo(_indexPath));
             // Initialize the Analyzer (ONCE)
             _analyzer = new StandardAnalyzer(AppLuceneVersion);
 
@@ -58,6 +71,7 @@ namespace MentalHealthPortal.Services
                 OpenMode = Lucene.Net.Index.OpenMode.CREATE_OR_APPEND
             };
             _writer = new Lucene.Net.Index.IndexWriter(_indexDirectory, writerConfig);
+            _logger.LogInformation("IndexService initialized, IndexWriter created.");
         }
 
         public FSDirectory GetIndexDirectory() => _indexDirectory;
@@ -76,72 +90,45 @@ namespace MentalHealthPortal.Services
         // AddOrUpdateDocument method to add or update documents in the Lucene index
         public void AddOrUpdateDocument(DocumentMetadata metadata, string extractedText)
         {
-            if (metadata == null) throw new ArgumentNullException(nameof(metadata));
+            if (metadata == null)
+            {
+                _logger.LogError("AddOrUpdateDocument received null metadata.");
+                throw new ArgumentNullException(nameof(metadata));
+            }
+
+            _logger.LogInformation("Attempting to add/update document ID {DocumentId} ('{OriginalFileName}') to Lucene index.", metadata.Id, metadata.OriginalFileName);
+
             if (string.IsNullOrEmpty(extractedText))
             {
-                // Decide how to handle empty extracted text. Log a warning? Skip indexing?
-                // For now, let's assume we might still want to index metadata even if text extraction failed.
-                // Or, you could throw an ArgumentNullException(nameof(extractedText));
-                Console.WriteLine($"Warning: Extracted text for document ID {metadata.Id} is empty. Indexing with empty content field.");
-                extractedText = ""; // Ensure it's not null for the TextField
+                _logger.LogWarning("Extracted text for document ID {DocumentId} is empty. Indexing with empty content field.", metadata.Id);
+                extractedText = string.Empty; 
             }
 
             var luceneDoc = new Lucene.Net.Documents.Document();
-
-            // Add document_id: Stored and Indexed (but not tokenized for exact match)
-            // Used as the term for UpdateDocument
             luceneDoc.Add(new StringField("document_id", metadata.Id.ToString(), Field.Store.YES));
-
-            // Add filename: Stored and Indexed (tokenized for searching parts of the filename)
-            if (!string.IsNullOrEmpty(metadata.OriginalFileName))
-            {
-                luceneDoc.Add(new TextField("filename", metadata.OriginalFileName, Field.Store.YES));
-            }
-            else
-            {
-                // Handle cases where OriginalFileName might be null or empty if that's possible
-                luceneDoc.Add(new TextField("filename", "Unknown", Field.Store.YES)); // Placeholder
-            }
-
-
-            // Add content: Indexed (tokenized) for full-text search. Not stored to save space.
-            // For snippets/highlighting, FieldType with term vectors would be needed.
-            // Example for TextField.TYPE_NOT_STORED which is Indexed and Tokenized but not Stored:
-            // public static readonly FieldType TYPE_NOT_STORED = new FieldType { IsIndexed = true, IsTokenized = true }.Freeze();
-            // luceneDoc.Add(new Field("content", extractedText, TextField.TYPE_NOT_STORED));
-            // For simplicity now, using constructor that defaults to not stored if not specified otherwise for TextField
-            luceneDoc.Add(new TextField("content", extractedText, Field.Store.NO));
-
-
-            // Add doc_type: Stored and Indexed (not tokenized for exact filtering)
-            if (!string.IsNullOrEmpty(metadata.DocumentType))
-            {
-                luceneDoc.Add(new StringField("doc_type", metadata.DocumentType, Field.Store.YES));
-            }
-            else
-            {
-                luceneDoc.Add(new StringField("doc_type", "Unknown", Field.Store.YES)); // Placeholder
-            }
-
+            luceneDoc.Add(new TextField("filename", metadata.OriginalFileName ?? "Unknown", Field.Store.YES));
+            luceneDoc.Add(new TextField("content", extractedText, Field.Store.NO)); 
+            luceneDoc.Add(new StringField("doc_type", metadata.DocumentType ?? "Unknown", Field.Store.YES));
 
             try
             {
-                // UpdateDocument will delete any existing document with the same term (doc_id)
-                // and then add the new document. If no document matches, it simply adds.
+                _logger.LogInformation("Calling IndexWriter.UpdateDocument for document ID {DocumentId}...", metadata.Id);
                 _writer.UpdateDocument(new Term("document_id", metadata.Id.ToString()), luceneDoc);
-                _writer.Commit(); // Commit changes to the index
-                Console.WriteLine($"Document ID {metadata.Id} ('{metadata.OriginalFileName}') added/updated in Lucene index.");
+                _logger.LogInformation("Calling IndexWriter.Commit for document ID {DocumentId}...", metadata.Id);
+                _writer.Commit();
+                _logger.LogInformation("SUCCESS: Document ID {DocumentId} ('{OriginalFileName}') added/updated in Lucene index at {IndexPath}", metadata.Id, metadata.OriginalFileName, _indexPath);
             }
             catch (Exception ex)
             {
-                // Log the exception (e.g., using ILogger)
-                Console.WriteLine($"Error adding/updating document ID {metadata.Id} to Lucene index: {ex.Message}");
-                // Depending on the error, you might want to re-throw or handle it
+                _logger.LogError(ex, "ERROR adding/updating document ID {DocumentId} to Lucene index at {IndexPath}: {ErrorMessage}", metadata.Id, _indexPath, ex.Message);
+                // Optionally re-throw or handle more gracefully depending on requirements
+                // For now, just logging, as the background service might not handle re-thrown exceptions well without adjustment.
             }
         }
 
-        public List<SearchResultItem> Search(string searchTerm, string? docTypeFilter = null) // Changed to string?
+        public List<SearchResultItem> Search(string searchTerm, string? docTypeFilter = null)
         {
+            _logger.LogInformation("Search requested for term '{SearchTerm}' with docTypeFilter '{DocTypeFilter}' in index {IndexPath}", searchTerm, docTypeFilter, _indexPath);
             var results = new List<SearchResultItem>();
             if (_indexDirectory == null) return results;
 
