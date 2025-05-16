@@ -21,6 +21,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<MentalHealthPortal.Services.TextExtractionService>(); // Register the TextExtractionService
 
+builder.Services.AddSingleton<MentalHealthPortal.Services.IBackgroundTaskQueue, MentalHealthPortal.Services.BackgroundTaskQueue>();
+
+builder.Services.AddHostedService<MentalHealthPortal.Services.QueuedHostedService>();
+
 var app = builder.Build();
 
 

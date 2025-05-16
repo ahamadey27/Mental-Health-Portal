@@ -117,11 +117,11 @@
     - [x] Implement service logic to save document metadata upon successful upload.
 
 ## Phase 2: Text Extraction & Search Implementation
-- [ ] **Text Extraction Integration:**
+- [x] **Text Extraction Integration:**
     - [x] Add NuGet packages: `PdfPig` and `DocX`.
     - [x] Implement a service to extract text content from uploaded PDF files using PdfPig.
     - [x] Implement a service to extract text content from uploaded DOCX files using DocX.
-    - [ ] Integrate text extraction into an asynchronous background process triggered after document upload and successful storage.
+    - [x] Integrate text extraction into an asynchronous background process triggered after document upload and successful storage.
 - [ ] **Local Search Indexing Setup (Lucene.NET):**
     - [ ] Add NuGet package: `Lucene.Net`.
     - [ ] Design and implement `IndexService` for managing Lucene.NET index:

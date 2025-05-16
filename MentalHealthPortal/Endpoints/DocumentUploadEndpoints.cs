@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting; //Adds IWebHostEnvironment which provides in
 using MentalHealthPortal.Data; // Added for ApplicationDbContext
 using MentalHealthPortal.Models; // Added for DocumentMetadata
 using MentalHealthPortal.Services;
-
+using Microsoft.Extensions.DependencyInjection; // Added for IServiceProvider
 
 namespace MentalHealthPortal.Endpoints
 {
@@ -15,8 +15,8 @@ namespace MentalHealthPortal.Endpoints
         
         public static void MapDocumentUploadEndpoints(this WebApplication app)
         {
-            // Add TextExtractionService to the parameters
-            app.MapPost("/api/documents/upload", async Task<IResult> ([FromForm] IFormFile file, IWebHostEnvironment env, ApplicationDbContext dbContext, TextExtractionService textExtractionService) =>
+            // Add IBackgroundTaskQueue to the parameters
+            app.MapPost("/api/documents/upload", async Task<IResult> ([FromForm] IFormFile file, IWebHostEnvironment env, ApplicationDbContext dbContext, TextExtractionService textExtractionService, IBackgroundTaskQueue backgroundTaskQueue) =>
             {
                 if (file == null || file.Length == 0)
                 {
@@ -60,42 +60,57 @@ namespace MentalHealthPortal.Endpoints
                     };
 
                     dbContext.DocumentMetadata.Add(metadata);
-                    await dbContext.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync(); // Initial save of metadata before queuing background task
 
-                    // ---- START: Text Extraction ----
-                    try
+                    // ---- START: Asynchronous Text Extraction via Background Queue ----
+                    backgroundTaskQueue.QueueBackgroundWorkItemAsync(async (serviceProvider, cancellationToken) =>
                     {
-                        // Extract text from the uploaded document
-                        string extractedText = await textExtractionService.ExtractTextAsync(filePath, metadata.DocumentType);
+                        // Create a new scope for this background task
+                        using (var scope = serviceProvider.CreateScope())
+                        {
+                            var scopedDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                            var scopedTextExtractionService = scope.ServiceProvider.GetRequiredService<TextExtractionService>();
 
-                        // Log the length of the extracted text (or the text itself for debugging, if it's not too long)
-                        Console.WriteLine($"Extracted text length for {originalFileName}: {extractedText.Length} characters.");
-                        // You could also log: Console.WriteLine($"Extracted text for {originalFileName}: {extractedText}");
+                            // It's crucial to re-fetch the metadata within this new scope
+                            // to avoid issues with DbContext tracking if the original dbContext instance
+                            // from the HTTP request is disposed before this background task runs.
+                            var metadataForExtraction = await scopedDbContext.DocumentMetadata.FindAsync(new object[] { metadata.Id }, cancellationToken);
 
+                            if (metadataForExtraction == null)
+                            {
+                                Console.WriteLine($"Error in background task: Metadata with ID {metadata.Id} not found.");
+                                return; // Or handle more robustly
+                            }
+                            
+                            try
+                            {
+                                Console.WriteLine($"Background task started for {metadataForExtraction.OriginalFileName} (ID: {metadataForExtraction.Id}). Extracting text...");
+                                string extractedText = await scopedTextExtractionService.ExtractTextAsync(metadataForExtraction.StoragePath, metadataForExtraction.DocumentType);
 
-                        // Update metadata with extracted text length
-                        metadata.ExtractedTextLength = extractedText.Length;
-                        // In the future, you might store keywords or a summary here too.
+                                metadataForExtraction.ExtractedTextLength = extractedText.Length;
+                                // Potentially log the extracted text length or a snippet for verification
+                                Console.WriteLine($"Text extraction complete for {metadataForExtraction.OriginalFileName}. Length: {extractedText.Length}. Updating database...");
 
-                        // Save the updated metadata
-                        await dbContext.SaveChangesAsync();
-                        Console.WriteLine($"Successfully updated metadata for {originalFileName} with text extraction info.");
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log any errors during text extraction
-                        Console.WriteLine($"Error during text extraction or metadata update for {originalFileName}: {ex.Message}");
-                        // Decide if this error should prevent the upload from being reported as successful.
-                        // For now, we'll still return OK for the file upload itself, but log the extraction error.
-                    }
-                    // ---- END: Text Extraction ----
+                                await scopedDbContext.SaveChangesAsync(cancellationToken);
+                                Console.WriteLine($"Successfully updated metadata for {metadataForExtraction.OriginalFileName} (ID: {metadataForExtraction.Id}) with extracted text length in background.");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error during background text extraction or metadata update for {metadataForExtraction.OriginalFileName} (ID: {metadataForExtraction.Id}): {ex.Message}");
+                                // Consider more robust error handling/logging here
+                            }
+                        }
+                    });
+                    // ---- END: Asynchronous Text Extraction via Background Queue ----
 
                     // 5. Return success with actual stored filename and path
+                    // The response is sent before text extraction completes.
                     return Results.Ok(new
                     {
-                        message = $"File '{originalFileName}' uploaded successfully and saved as '{uniqueFileName}'.",
+                        message = $"File '{originalFileName}' uploaded successfully as '{uniqueFileName}'. Text extraction has been queued and will process in the background.",
                         storedFileName = uniqueFileName,
-                        filePath = filePath
+                        filePath = filePath,
+                        metadataId = metadata.Id // Optionally return the ID for client-side tracking
                     });
 
                 }
