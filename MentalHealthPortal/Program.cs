@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 // Configure EF Core to use SQLite
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=mentalhealthportal.db";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -24,6 +25,10 @@ builder.Services.AddScoped<MentalHealthPortal.Services.TextExtractionService>();
 builder.Services.AddSingleton<MentalHealthPortal.Services.IBackgroundTaskQueue, MentalHealthPortal.Services.BackgroundTaskQueue>();
 
 builder.Services.AddHostedService<MentalHealthPortal.Services.QueuedHostedService>();
+
+builder.Services.AddSingleton<MentalHealthPortal.Services.IndexService>();
+
+
 
 var app = builder.Build();
 

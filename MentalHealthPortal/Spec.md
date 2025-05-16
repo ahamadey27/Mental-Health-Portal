@@ -123,9 +123,9 @@
     - [x] Implement a service to extract text content from uploaded DOCX files using DocX.
     - [x] Integrate text extraction into an asynchronous background process triggered after document upload and successful storage.
 - [ ] **Local Search Indexing Setup (Lucene.NET):**
-    - [ ] Add NuGet package: `Lucene.Net`.
+    - [x] Add NuGet package: `Lucene.Net`.
     - [ ] Design and implement `IndexService` for managing Lucene.NET index:
-        - [ ] Configure `FSDirectory` to store index files in a local directory.
+        - [x] Configure `FSDirectory` to store index files in a local directory.
         - [ ] Define Lucene `Document` schema (fields: `document_id`, `filename`, `content`, `doc_type`).
         - [ ] Implement logic to add/update documents in the index using `IndexWriter` after text extraction.
         - [ ] Choose and configure an appropriate `Analyzer` (e.g., `StandardAnalyzer`).
