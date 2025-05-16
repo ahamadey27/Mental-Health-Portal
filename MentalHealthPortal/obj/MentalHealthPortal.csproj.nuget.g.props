@@ -23,6 +23,7 @@
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <PkgMicrosoft_Extensions_ApiDescription_Server Condition=" '$(PkgMicrosoft_Extensions_ApiDescription_Server)' == '' ">C:\Users\hamad\.nuget\packages\microsoft.extensions.apidescription.server\6.0.5</PkgMicrosoft_Extensions_ApiDescription_Server>
     <PkgMicrosoft_CodeAnalysis_Analyzers Condition=" '$(PkgMicrosoft_CodeAnalysis_Analyzers)' == '' ">C:\Users\hamad\.nuget\packages\microsoft.codeanalysis.analyzers\3.3.4</PkgMicrosoft_CodeAnalysis_Analyzers>
+    <PkgLucene_Net Condition=" '$(PkgLucene_Net)' == '' ">C:\Users\hamad\.nuget\packages\lucene.net\4.8.0-beta00016</PkgLucene_Net>
     <PkgDocX Condition=" '$(PkgDocX)' == '' ">C:\Users\hamad\.nuget\packages\docx\4.0.25105.5786</PkgDocX>
   </PropertyGroup>
 </Project>

@@ -122,15 +122,15 @@
     - [x] Implement a service to extract text content from uploaded PDF files using PdfPig.
     - [x] Implement a service to extract text content from uploaded DOCX files using DocX.
     - [x] Integrate text extraction into an asynchronous background process triggered after document upload and successful storage.
-- [ ] **Local Search Indexing Setup (Lucene.NET):**
+- [x] **Local Search Indexing Setup (Lucene.NET):**
     - [x] Add NuGet package: `Lucene.Net`.
-    - [ ] Design and implement `IndexService` for managing Lucene.NET index:
+    - [x] Design and implement `IndexService` for managing Lucene.NET index:
         - [x] Configure `FSDirectory` to store index files in a local directory.
-        - [ ] Define Lucene `Document` schema (fields: `document_id`, `filename`, `content`, `doc_type`).
-        - [ ] Implement logic to add/update documents in the index using `IndexWriter` after text extraction.
-        - [ ] Choose and configure an appropriate `Analyzer` (e.g., `StandardAnalyzer`).
+        - [x] Define Lucene `Document` schema (fields: `document_id`, `filename`, `content`, `doc_type`).
+        - [x] Implement logic to add/update documents in the index using `IndexWriter` after text extraction.
+        - [x] Choose and configure an appropriate `Analyzer` (e.g., `StandardAnalyzer`).
 - [ ] **Basic Search Functionality:**
-    - [ ] Implement search logic in `IndexService` using `IndexSearcher` and `QueryParser`.
+    - [x] Implement search logic in `IndexService` using `IndexSearcher` and `QueryParser`.
     - [ ] Create a Minimal API endpoint (e.g., `GET /api/search`) that accepts keywords and optional document type filter.
     - [ ] Develop a basic Search UI:
         - [ ] Text input for search queries.

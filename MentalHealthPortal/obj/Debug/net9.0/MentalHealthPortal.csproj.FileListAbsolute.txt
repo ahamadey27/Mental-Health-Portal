@@ -168,3 +168,6 @@ C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debu
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\runtimes\win-x64\native\libSkiaSharp.dll
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\runtimes\win-x86\native\libSkiaSharp.dll
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\staticwebassets.build.json.cache
+C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\J2N.dll
+C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.dll
+C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.Analysis.Common.dll
