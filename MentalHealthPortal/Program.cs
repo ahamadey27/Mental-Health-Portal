@@ -1,6 +1,8 @@
 using MentalHealthPortal.Endpoints;
-using MentalHealthPortal.Data; // Add this using directive
-using Microsoft.EntityFrameworkCore; // Add this using directive
+using MentalHealthPortal.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc; // Add this for [FromQuery]
+using MentalHealthPortal.Services; // Add this for IndexService and SearchResultItem
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,21 @@ builder.Services.AddSingleton<MentalHealthPortal.Services.IndexService>();
 
 
 var app = builder.Build();
+
+app.MapGet("/api/search", ([FromQuery] string searchTerm, [FromQuery] string? docTypeFilter, IndexService indexService) =>
+{
+    if (string.IsNullOrWhiteSpace(searchTerm))
+    {
+        return Results.BadRequest("Search term cannot be empty.");
+    }
+
+    var searchResults = indexService.Search(searchTerm, docTypeFilter);
+    return Results.Ok(searchResults);
+})
+.WithName("SearchDocuments")
+.WithTags("Search")
+.Produces<List<SearchResultItem>>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest);
 
 
 

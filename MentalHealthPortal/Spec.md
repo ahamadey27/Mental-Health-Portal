@@ -131,7 +131,7 @@
         - [x] Choose and configure an appropriate `Analyzer` (e.g., `StandardAnalyzer`).
 - [ ] **Basic Search Functionality:**
     - [x] Implement search logic in `IndexService` using `IndexSearcher` and `QueryParser`.
-    - [ ] Create a Minimal API endpoint (e.g., `GET /api/search`) that accepts keywords and optional document type filter.
+    - [x] Create a Minimal API endpoint (e.g., `GET /api/search`) that accepts keywords and optional document type filter.
     - [ ] Develop a basic Search UI:
         - [ ] Text input for search queries.
         - [ ] Option to filter by document type (PDF/DOCX).
