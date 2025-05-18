@@ -22,7 +22,6 @@ namespace MentalHealthPortal.Services
 
         private readonly FSDirectory _indexDirectory;
         private readonly StandardAnalyzer _analyzer; 
-        private readonly string? _luceneIndexRootPathConfigValue;
 
         private readonly IndexWriter _writer;
         private readonly ILogger<IndexService> _logger; // Add ILogger field
@@ -65,12 +64,19 @@ namespace MentalHealthPortal.Services
             _analyzer = new StandardAnalyzer(AppLuceneVersion);
 
             // Configure and create the IndexWriter
-            // Ensure Lucene.Net.Index.IndexWriterConfig and Lucene.Net.Index.OpenMode are resolved
             var writerConfig = new Lucene.Net.Index.IndexWriterConfig(AppLuceneVersion, _analyzer)
             {
                 OpenMode = Lucene.Net.Index.OpenMode.CREATE_OR_APPEND
             };
             _writer = new Lucene.Net.Index.IndexWriter(_indexDirectory, writerConfig);
+
+            // If the index is newly created (or was empty), perform an initial commit
+            // to ensure segment files are present before any search is attempted.
+            if (!DirectoryReader.IndexExists(_indexDirectory))
+            {
+                _logger.LogInformation("Performing initial commit on newly created Lucene index at: {IndexPath}", _indexPath);
+                _writer.Commit(); // Perform an empty commit to initialize the segment files
+            }
             _logger.LogInformation("IndexService initialized, IndexWriter created.");
         }
 

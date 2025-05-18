@@ -34,14 +34,14 @@ builder.Services.AddSingleton<MentalHealthPortal.Services.IndexService>();
 
 var app = builder.Build();
 
-app.MapGet("/api/search", ([FromQuery] string searchTerm, [FromQuery] string? docTypeFilter, IndexService indexService) =>
+app.MapGet("/api/search", ([FromQuery] string keywords, [FromQuery] string? docTypeFilter, IndexService indexService) =>
 {
-    if (string.IsNullOrWhiteSpace(searchTerm))
+    if (string.IsNullOrWhiteSpace(keywords))
     {
         return Results.BadRequest("Search term cannot be empty.");
     }
 
-    var searchResults = indexService.Search(searchTerm, docTypeFilter);
+    var searchResults = indexService.Search(keywords, docTypeFilter);
     return Results.Ok(searchResults);
 })
 .WithName("SearchDocuments")
