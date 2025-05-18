@@ -119,7 +119,7 @@
                         <th>Document ID</th>
                         <th>File Name</th>
                         <th>Type</th>
-                        <th>Score</th>
+                        <th>View</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -244,7 +244,17 @@
                             row.insertCell().textContent = item.documentId;
                             row.insertCell().textContent = item.fileName;
                             row.insertCell().textContent = item.docType;
-                            row.insertCell().textContent = item.score.toFixed(5);
+                            // row.insertCell().textContent = item.score.toFixed(5);
+                            const viewCell = row.insertCell();
+                            if (item.storedFileName) {
+                                const link = document.createElement('a');
+                                link.href = `/session_uploads/${item.storedFileName}`;
+                                link.textContent = "Link";
+                                link.target = "_blank"; // Open in new tab
+                                viewCell.appendChild(link);
+                            } else {
+                                viewCell.textContent = "N/A";
+                            }
                         });
                         searchResultsArea.style.display = 'block';
                     } else {

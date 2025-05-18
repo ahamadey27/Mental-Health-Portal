@@ -9,6 +9,6 @@ namespace MentalHealthPortal.Models
         public required string OriginalFileName { get; set; }
         public required string DocumentType { get; set; } // e.g., "PDF", "DOCX"
         public DateTime UploadTimestamp { get; set; }
-        public int? ExtractedTextLength { get; set; } 
+        public string? StoredFileName { get; set; } // Added for linking to the stored file
     }
 }

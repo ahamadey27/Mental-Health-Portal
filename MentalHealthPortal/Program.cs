@@ -57,6 +57,15 @@ else
 // app.UseHttpsRedirection(); // Commented out for now to resolve port warning in local dev
 app.UseDefaultFiles(); // Serve default files like index.html from wwwroot
 app.UseStaticFiles(); //Serve static files from wwwroot (indes.html, css, js)
+
+// Serve files from the session_uploads directory
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(builder.Environment.WebRootPath, "session_uploads")),
+    RequestPath = "/session_uploads"
+});
+
 app.UseRouting(); //Enables Routing
 
 // If you add authentication/authorization later, they would go here:

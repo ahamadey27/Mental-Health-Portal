@@ -93,11 +93,13 @@ namespace MentalHealthPortal.Services
                 new StringField("document_id", documentIdString, Field.Store.YES),
                 new TextField("filename", metadata.OriginalFileName ?? "Unknown", Field.Store.YES),
                 new TextField("content", extractedText, Field.Store.NO), // Content is indexed but not stored
-                new StringField("doc_type", metadata.DocumentType ?? "Unknown", Field.Store.YES)
+                new StringField("doc_type", metadata.DocumentType ?? "Unknown", Field.Store.YES),
+                // Store the StoredFileName if available, otherwise use OriginalFileName as a fallback for the link
+                new StringField("stored_filename", metadata.StoredFileName ?? metadata.OriginalFileName ?? "Unknown", Field.Store.YES)
             };
             
-            _logger.LogDebug("Lucene document fields for Id {DocumentId}: document_id='{DocumentIdInDoc}', filename='{FileName}', doc_type='{DocType}', content_length={ContentLength}", 
-                documentIdString, luceneDoc.Get("document_id"), luceneDoc.Get("filename"), luceneDoc.Get("doc_type"), extractedText.Length);
+            _logger.LogDebug("Lucene document fields for Id {DocumentId}: document_id='{DocumentIdInDoc}', filename='{FileName}', doc_type='{DocType}', stored_filename='{StoredFileName}', content_length={ContentLength}", 
+                documentIdString, luceneDoc.Get("document_id"), luceneDoc.Get("filename"), luceneDoc.Get("doc_type"), luceneDoc.Get("stored_filename"), extractedText.Length);
 
             try
             {
@@ -112,94 +114,83 @@ namespace MentalHealthPortal.Services
             }
         }
 
-        public List<SearchResultItem> Search(string searchTerm, string? docTypeFilter = null)
+        public List<SearchResultItem> Search(string keywords, string? docTypeFilter = null)
         {
-            _logger.LogInformation("Search requested for term '{SearchTerm}' with docTypeFilter '{DocTypeFilter}' in RAM index", searchTerm, docTypeFilter);
+            _logger.LogInformation("Search initiated with keywords: '{Keywords}', docTypeFilter: '{DocTypeFilter}'", keywords, docTypeFilter ?? "N/A");
             var results = new List<SearchResultItem>();
 
-            if (_writer == null || _indexDirectory == null) {
-                 _logger.LogWarning("Search attempted on uninitialized RAMDirectory or writer.");
+            if (string.IsNullOrWhiteSpace(keywords) && string.IsNullOrWhiteSpace(docTypeFilter))
+            {
+                _logger.LogWarning("Search attempted with empty keywords and no document type filter.");
+                return results; // Return empty list if no search criteria
+            }
+
+            // Corrected: Use DirectoryReader.IndexExists with the directory itself
+            if (!DirectoryReader.IndexExists(_indexDirectory)) 
+            {
+                _logger.LogWarning("Search attempted but Lucene index does not exist or is empty.");
                 return results;
             }
-            
-            try
-            {
-                using var reader = DirectoryReader.Open(_indexDirectory); // Open reader on current state of RAMDirectory
-                var searcher = new IndexSearcher(reader);
-                
-                // Ensure analyzer matches the one used at indexing time
-                var queryParser = new QueryParser(AppLuceneVersion, "content", _analyzer);
-                queryParser.AllowLeadingWildcard = true; // Allow leading wildcards for more flexible searches if needed
 
-                Query query;
+            using var reader = _writer.GetReader(applyAllDeletes: true);
+            var searcher = new IndexSearcher(reader);
+            
+            var booleanQuery = new BooleanQuery();
+
+            // Keyword query for 'content' field
+            if (!string.IsNullOrWhiteSpace(keywords))
+            {
+                var queryParser = new QueryParser(AppLuceneVersion, "content", _analyzer);
                 try
                 {
-                    // Attempt to parse the raw search term first
-                    query = queryParser.Parse(searchTerm);
-                    _logger.LogInformation("Parsed query (raw): {ParsedQuery}", query.ToString());
+                    Query keywordQuery = queryParser.Parse(QueryParserBase.Escape(keywords)); // Escape special characters
+                    booleanQuery.Add(keywordQuery, Occur.MUST); // MUST: keywords must be present
+                    _logger.LogDebug("Keyword query parsed: {KeywordQuery}", keywordQuery.ToString());
                 }
-                catch (ParseException)
+                catch (ParseException ex)
                 {
-                    _logger.LogWarning("Raw search term parse failed for: '{SearchTerm}'. Attempting with escaped wildcards.", searchTerm);
-                    try
-                    {
-                        // Fallback to escaping and adding wildcards if direct parsing fails
-                        string escapedSearchTerm = QueryParserBase.Escape(searchTerm);
-                        query = queryParser.Parse("*" + escapedSearchTerm + "*");
-                        _logger.LogInformation("Parsed query (escaped with wildcards): {ParsedQuery}", query.ToString());
-                    }
-                    catch (ParseException exWild)
-                    {
-                        _logger.LogError(exWild, "Could not parse search term (even with escaped wildcards): {SearchTerm}", searchTerm);
-                        return results;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(docTypeFilter))
-                {
-                    var booleanQuery = new BooleanQuery();
-                    booleanQuery.Add(query, Occur.MUST); // Original search query
-
-                    var docTypeTermQuery = new TermQuery(new Term("doc_type", docTypeFilter));
-                    booleanQuery.Add(docTypeTermQuery, Occur.MUST); // Filter by document type
-                    query = booleanQuery;
-                    _logger.LogInformation("Applied docTypeFilter. Combined query: {CombinedQuery}", query.ToString());
-                }
-                
-                _logger.LogDebug("Executing search with query: {FinalQuery}", query.ToString());
-                var topDocs = searcher.Search(query, n: 10); // Get top 10 results
-                _logger.LogInformation("Search found {HitCount} documents for term \'{SearchTerm}\'.", topDocs.TotalHits, searchTerm);
-
-                foreach (var scoreDoc in topDocs.ScoreDocs)
-                {
-                    var doc = searcher.Doc(scoreDoc.Doc);
-                    var documentIdString = doc.Get("document_id"); 
-                    // Assuming document_id is now a string (e.g. Guid.ToString()) for in-memory model
-                    // If you need to convert back to Guid: Guid.TryParse(documentIdString, out var parsedGuid)
-
-                    results.Add(new SearchResultItem
-                    {
-                        // For MVP, documentId might just be the original filename if that's how we retrieve/show it
-                        DocumentId = documentIdString, // Storing as string
-                        FileName = doc.Get("filename"),
-                        DocType = doc.Get("doc_type"),
-                        Score = scoreDoc.Score,
-                    });
+                    _logger.LogError(ex, "Error parsing keywords query: {Keywords}", keywords);
+                    return results; 
                 }
             }
-            catch(IndexNotFoundException indexNotFoundEx)
+
+            // Document type filter for 'doc_type' field
+            if (!string.IsNullOrWhiteSpace(docTypeFilter))
             {
-                // This should be less likely with RAMDirectory if an initial commit is done,
-                // but could happen if Open is called too early or on a disposed directory.
-                _logger.LogWarning(indexNotFoundEx, "IndexNotFoundException during search in RAMDirectory. This might mean no documents have been indexed or an initial commit was missed.");
-                return results; // Return empty list
+                var termQuery = new TermQuery(new Term("doc_type", docTypeFilter.ToUpperInvariant()));
+                // Corrected: For filtering, Occur.MUST is appropriate if the condition is mandatory.
+                // If it were optional or to exclude, Occur.SHOULD or Occur.MUST_NOT would be used.
+                // For a filter-like behavior where it must match but doesn't contribute to score in the same way as keyword matches,
+                // this is a common approach. More complex filtering can be achieved with FilteredQuery or other constructs
+                // but for this simple case, adding as a required clause is standard.
+                booleanQuery.Add(termQuery, Occur.MUST); 
+                _logger.LogDebug("Document type filter added: {DocTypeFilterQuery}", termQuery.ToString());
             }
-            catch (Exception ex)
+
+            if (booleanQuery.Clauses.Count == 0)
             {
-                _logger.LogError(ex, "Exception during search in RAMDirectory for term \'{SearchTerm}\'.", searchTerm);
-                // Depending on the exception, you might want to return empty or rethrow
-                return results; // Return empty list on other errors
+                _logger.LogWarning("Search query is empty after processing inputs. No search will be performed.");
+                return results; // No valid criteria to search on
             }
+
+            _logger.LogInformation("Executing combined Lucene query: {LuceneQuery}", booleanQuery.ToString());
+
+            TopDocs topDocs = searcher.Search(booleanQuery, n: 100); // Get top 100 results
+            _logger.LogInformation("Search completed. Found {TotalHits} total matching documents.", topDocs.TotalHits);
+
+            foreach (ScoreDoc scoreDoc in topDocs.ScoreDocs)
+            {
+                Document resultDoc = searcher.Doc(scoreDoc.Doc);
+                results.Add(new SearchResultItem
+                {
+                    DocumentId = resultDoc.Get("document_id"),
+                    FileName = resultDoc.Get("filename"),
+                    DocType = resultDoc.Get("doc_type"),
+                    Score = scoreDoc.Score,
+                    StoredFileName = resultDoc.Get("stored_filename") // Retrieve stored_filename
+                });
+            }
+            _logger.LogInformation("Returning {ResultsCount} search results.", results.Count);
             return results;
         }
     }

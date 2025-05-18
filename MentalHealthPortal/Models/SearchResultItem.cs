@@ -6,6 +6,7 @@ namespace MentalHealthPortal.Models
         public string? FileName { get; set; }
         public string? DocType { get; set; }
         public float Score { get; set; }
+        public string? StoredFileName { get; set; } // Added to pass stored file name to search results
         // Add any other properties you want to return for a search result
         // For example, a snippet of the content:
         // public string? Snippet { get; set; }

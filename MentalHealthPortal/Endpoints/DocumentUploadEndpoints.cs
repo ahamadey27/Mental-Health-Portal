@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc; // Added for [FromForm]
 using MentalHealthPortal.Models;
 using MentalHealthPortal.Services;
 using Microsoft.Extensions.Logging; 
+using Microsoft.AspNetCore.Hosting; // Required for IWebHostEnvironment
 
 namespace MentalHealthPortal.Endpoints
 {
@@ -13,9 +14,13 @@ namespace MentalHealthPortal.Endpoints
         
         public static void MapDocumentUploadEndpoints(this WebApplication app)
         {
-            // Changed ILogger<DocumentUploadEndpoints> to ILogger<Program> 
-            // app.MapPost("/api/documents/upload", async Task<IResult> ([FromForm] IFormFile file, TextExtractionService textExtractionService, IndexService indexService, ILogger<Program> logger) =>
-            app.MapPost("/api/documents/upload", async Task<IResult> ([FromForm] IFormFileCollection files, TextExtractionService textExtractionService, IndexService indexService, ILogger<Program> logger) =>
+            var sessionUploadsPath = Path.Combine(app.Environment.WebRootPath, "session_uploads");
+            if (!Directory.Exists(sessionUploadsPath))
+            {
+                Directory.CreateDirectory(sessionUploadsPath);
+            }
+
+            app.MapPost("/api/documents/upload", async Task<IResult> ([FromForm] IFormFileCollection files, TextExtractionService textExtractionService, IndexService indexService, ILogger<Program> logger, IWebHostEnvironment env) =>
             {
                 // if (file == null || file.Length == 0)
                 if (files == null || files.Count == 0)
@@ -50,10 +55,21 @@ namespace MentalHealthPortal.Endpoints
                     try
                     {
                         string extractedText;
-                        using (var memoryStream = new MemoryStream())
+                        // Generate a unique name for storage to avoid conflicts
+                        var uniqueStoredFileName = $"{Guid.NewGuid()}_{originalFileName}";
+                        var filePathToSave = Path.Combine(sessionUploadsPath, uniqueStoredFileName);
+
+                        using (var fileStream = new FileStream(filePathToSave, FileMode.Create))
                         {
-                            await file.CopyToAsync(memoryStream);
-                            extractedText = await textExtractionService.ExtractTextAsync(memoryStream, fileExtension.TrimStart('.').ToUpperInvariant(), originalFileName);
+                            await file.CopyToAsync(fileStream);
+                        }
+                        
+                        // Now use the saved file for extraction to ensure consistency, or use a memory stream if preferred
+                        // For this example, let's re-open the saved file for extraction.
+                        // Alternatively, could do memoryStream first, then save memoryStream to disk.
+                        using (var streamForExtraction = new FileStream(filePathToSave, FileMode.Open, FileAccess.Read))
+                        {
+                             extractedText = await textExtractionService.ExtractTextAsync(streamForExtraction, fileExtension.TrimStart('.').ToUpperInvariant(), originalFileName);
                         }
                         
                         logger.LogInformation("Text extracted for {OriginalFileName}. Length: {Length}", originalFileName, extractedText.Length);
@@ -63,7 +79,8 @@ namespace MentalHealthPortal.Endpoints
                             Id = Guid.NewGuid().ToString(),
                             OriginalFileName = originalFileName,
                             DocumentType = fileExtension.TrimStart('.').ToUpperInvariant(),
-                            UploadTimestamp = DateTime.UtcNow
+                            UploadTimestamp = DateTime.UtcNow,
+                            StoredFileName = uniqueStoredFileName // Store the unique name used for saving
                         };
 
                         indexService.AddOrUpdateDocument(metadata, extractedText);
