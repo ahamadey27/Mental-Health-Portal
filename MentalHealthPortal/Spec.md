@@ -89,8 +89,8 @@
         - Fields: `document_id` (generated unique ID), `filename`, `content` (extracted text), `doc_type`.
 - [ ] **Search UI & API (Session-Only):**
     - [x] Create a simple search UI (text input for keywords, optional filter for document type).
-    - [ ] Implement a Minimal API endpoint (e.g., `GET /api/search?keywords=...&docType=...`) that uses `IndexService` to query the `RAMDirectory`.
-    - [ ] Display search results in a basic table format on the UI (e.g., FileName, DocType).
+    - [x] Implement a Minimal API endpoint (e.g., `GET /api/search?keywords=...&docType=...`) that uses `IndexService` to query the `RAMDirectory`.
+    - [x] Display search results in a basic table format on the UI (e.g., FileName, DocType).
 - [ ] **Testing (MVP Workflow):**
     - [ ] Test document upload for PDF and DOCX files.
     - [ ] Verify success messages and unique identifiers.

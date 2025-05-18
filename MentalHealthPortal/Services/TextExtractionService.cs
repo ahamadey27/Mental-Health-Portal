@@ -34,9 +34,16 @@ namespace MentalHealthPortal.Services
                         // PdfDocument.Open now takes a stream
                         using (PdfDocument document = PdfDocument.Open(stream))
                         {
+                            if (document.NumberOfPages == 0)
+                            {
+                                Console.WriteLine($"Warning: PDF file {originalFileName} has 0 pages.");
+                            }
                             foreach (Page page in document.GetPages())
                             {
-                                textBuilder.Append(page.Text);
+                                string pageText = page.Text;
+                                // Log a snippet of the extracted text per page for debugging
+                                Console.WriteLine($"Extracted from {originalFileName} (Page {page.Number}): {pageText.Substring(0, Math.Min(pageText.Length, 200))}[...]");
+                                textBuilder.Append(pageText);
                                 textBuilder.AppendLine(); // Add new line between pages for readability
                             }
                         }
@@ -57,11 +64,15 @@ namespace MentalHealthPortal.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error extracting text from stream for file '{originalFileName}' (Type: {documentType}): {ex.Message}");
+                    Console.WriteLine($"Error extracting text from stream for file \'{originalFileName}\' (Type: {documentType}): {ex.Message}");
+                    Console.WriteLine($"Stack Trace: {ex.StackTrace}"); // Log stack trace
                     // Consider logging the full exception details if using ILogger
                     return string.Empty;
                 }
-                return textBuilder.ToString();
+                // Log the final combined text before returning
+                var finalText = textBuilder.ToString();
+                Console.WriteLine($"Final extracted text for {originalFileName} (Length: {finalText.Length}): {finalText.Substring(0, Math.Min(finalText.Length, 500))}[...]");
+                return finalText;
             });
         }
     }
