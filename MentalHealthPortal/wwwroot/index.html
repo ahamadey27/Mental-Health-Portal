@@ -90,8 +90,8 @@
         <h2>Upload Document</h2>
         <form id="uploadForm" action="/api/documents/upload" method="post" enctype="multipart/form-data">
             <div>
-                <label for="file">Choose document (PDF or DOCX):</label>
-                <input type="file" id="file" name="file" accept=".pdf,.docx" required />
+                <label for="file">Choose document(s) (PDF or DOCX):</label>
+                <input type="file" id="file" name="files" accept=".pdf,.docx" required multiple />
             </div>
             <input type="submit" value="Upload" /> </form>
         <!-- Form will go here -->
@@ -139,32 +139,51 @@
             messageArea.textContent = '';
             messageArea.className = 'message'; // Reset message area class
 
-            const formData = new FormData(form);
+            const formData = new FormData(); // Changed: No longer pass 'form' directly
             const fileInput = document.getElementById('file');
 
-            // Basic validation: Check if a file is selected
+            // Basic validation: Check if files are selected
             if (!fileInput.files || fileInput.files.length === 0) {
-                showMessage('Please select a file to upload.', 'error');
+                showMessage('Please select one or more files to upload.', 'error');
                 return;
             }
 
-            const fileName = fileInput.files[0].name;
-            // Basic validation: Check file extension
-            if (!fileName.endsWith('.pdf') && !fileName.endsWith('.docx')) {
-                showMessage('Invalid file type. Only PDF and DOCX are allowed.', 'error');
+            let allFilesValid = true;
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const fileName = file.name;
+                if (!fileName.endsWith('.pdf') && !fileName.endsWith('.docx')) {
+                    showMessage(`Invalid file type: ${fileName}. Only PDF and DOCX are allowed.`, 'error');
+                    allFilesValid = false;
+                    break; 
+                }
+                formData.append('files', file); // Append each file. 'files' must match the backend parameter name.
+            }
+
+            if (!allFilesValid) {
                 return;
             }
 
             try {
-                const response = await fetch('/api/documents/upload', { // Matches form action
+                const response = await fetch('/api/documents/upload', {
                     method: 'POST',
-                    body: formData, // FormData will correctly set headers for multipart
+                    body: formData,
                 });
 
                 if (response.ok) {
-                    const result = await response.json(); // Assuming server sends JSON back
-                    showMessage('File uploaded successfully! Stored as: ' + (result.documentId || 'N/A'), 'success');
-                    form.reset(); // Clear the form
+                    const result = await response.json();
+                    // Adjust message for multiple files
+                    let successMessage = "Files processed successfully: ";
+                    if (result.successfulUploads && result.successfulUploads.length > 0) {
+                        successMessage += result.successfulUploads.join(', ');
+                    } else {
+                        successMessage = "No files were processed successfully.";
+                    }
+                    if (result.errors && result.errors.length > 0) {
+                        successMessage += "\\nErrors: " + result.errors.join(', ');
+                    }
+                    showMessage(successMessage, 'success');
+                    form.reset(); 
                 } else {
                     // Try to get a message from the server's JSON response
                     let errorMessage = response.statusText;
