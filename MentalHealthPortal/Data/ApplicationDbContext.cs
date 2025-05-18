@@ -16,10 +16,10 @@ namespace MentalHealthPortal.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure StoredFileName to be unique
-            modelBuilder.Entity<DocumentMetadata>()
-                .HasIndex(d => d.StoredFileName)
-                .IsUnique();
+            // Configure StoredFileName to be unique - REMOVED FOR SESSION-ONLY MVP
+            // modelBuilder.Entity<DocumentMetadata>()
+            //     .HasIndex(d => d.StoredFileName)
+            //     .IsUnique();
         }
     }
 }

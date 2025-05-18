@@ -9,47 +9,56 @@ namespace MentalHealthPortal.Services
 {
     public class TextExtractionService
     {
-        public async Task<string> ExtractTextAsync(string filePath, string documentType)
+        // Updated to accept a Stream and originalFileName (for context/logging)
+        public async Task<string> ExtractTextAsync(Stream stream, string documentType, string originalFileName)
         {
-            // Wrap the potentially long-running synchronous file operations in Task.Run
             return await Task.Run(() =>
             {
-                if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                if (stream == null || stream.Length == 0)
                 {
-                    Console.WriteLine($"Error: File path is invalid or file does not exist: {filePath}");
+                    Console.WriteLine($"Error: Stream is null or empty for file: {originalFileName}");
                     return string.Empty;
                 }
 
                 StringBuilder textBuilder = new StringBuilder();
                 try
                 {
+                    // Ensure stream position is at the beginning if it might have been read before
+                    if (stream.CanSeek)
+                    {
+                        stream.Position = 0;
+                    }
+
                     if (documentType.Equals("PDF", StringComparison.OrdinalIgnoreCase))
                     {
-                        using (PdfDocument document = PdfDocument.Open(filePath))
+                        // PdfDocument.Open now takes a stream
+                        using (PdfDocument document = PdfDocument.Open(stream))
                         {
                             foreach (Page page in document.GetPages())
                             {
                                 textBuilder.Append(page.Text);
-                                textBuilder.AppendLine();
+                                textBuilder.AppendLine(); // Add new line between pages for readability
                             }
                         }
                     }
                     else if (documentType.Equals("DOCX", StringComparison.OrdinalIgnoreCase))
                     {
-                        using (DocX document = DocX.Load(filePath))
+                        // DocX.Load now takes a stream
+                        using (DocX document = DocX.Load(stream))
                         {
                             textBuilder.Append(document.Text);
                         }
                     }
                     else
                     {
-                        Console.WriteLine($"Unsupported document type: {documentType} for file: {filePath}");
+                        Console.WriteLine($"Unsupported document type: {documentType} for file: {originalFileName}");
                         return string.Empty;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error extracting text from '{filePath}': {ex.Message}");
+                    Console.WriteLine($"Error extracting text from stream for file '{originalFileName}' (Type: {documentType}): {ex.Message}");
+                    // Consider logging the full exception details if using ILogger
                     return string.Empty;
                 }
                 return textBuilder.ToString();

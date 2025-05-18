@@ -70,8 +70,14 @@ namespace MentalHealthPortal.Services
                 _logger.LogError("AddOrUpdateDocument received null metadata.");
                 throw new ArgumentNullException(nameof(metadata));
             }
-            // metadata.Id is an int, convert to string for Lucene
-            string documentIdString = metadata.Id.ToString();
+            // metadata.Id is now a string, no need for ToString()
+            string documentIdString = metadata.Id;
+
+            if (string.IsNullOrEmpty(documentIdString))
+            {
+                _logger.LogError("AddOrUpdateDocument received metadata with null or empty Id.");
+                throw new ArgumentException("Metadata.Id cannot be null or empty for indexing.", nameof(metadata.Id));
+            }
 
             _logger.LogInformation("Attempting to add/update document Id: {DocumentId}, FileName: '{OriginalFileName}' to RAM Lucene index.", documentIdString, metadata.OriginalFileName);
             _logger.LogDebug("Extracted text for document Id {DocumentId}: '{ExtractedText}'", documentIdString, extractedText);
