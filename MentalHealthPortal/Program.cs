@@ -1,8 +1,7 @@
 using MentalHealthPortal.Endpoints;
-using MentalHealthPortal.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc; // Add this for [FromQuery]
-using MentalHealthPortal.Services; // Add this for IndexService and SearchResultItem
+using MentalHealthPortal.Services; // Add this for IndexService
+using MentalHealthPortal.Models; // Add this for SearchResultItem
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,12 +14,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-
-// Configure EF Core to use SQLite
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=mentalhealthportal.db";
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
 
 builder.Services.AddScoped<MentalHealthPortal.Services.TextExtractionService>(); // Register the TextExtractionService
 
@@ -46,7 +39,7 @@ app.MapGet("/api/search", ([FromQuery] string keywords, [FromQuery] string? docT
 })
 .WithName("SearchDocuments")
 .WithTags("Search")
-.Produces<List<SearchResultItem>>(StatusCodes.Status200OK)
+.Produces<List<MentalHealthPortal.Models.SearchResultItem>>(StatusCodes.Status200OK) // Added MentalHealthPortal.Models namespace
 .Produces(StatusCodes.Status400BadRequest);
 
 
