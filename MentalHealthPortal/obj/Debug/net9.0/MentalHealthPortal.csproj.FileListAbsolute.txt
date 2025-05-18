@@ -14,7 +14,6 @@ C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debu
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\MentalHealthPortal.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\MentalHealthPortal.sourcelink.json
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\scopedcss\bundle\MentalHealthPortal.styles.css
-C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\compressed\62bxmu890e-ulqe4isdlt.gz
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\staticwebassets.build.json
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\staticwebassets.development.json
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\staticwebassets.build.endpoints.json
@@ -174,3 +173,4 @@ C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debu
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.Queries.dll
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.QueryParser.dll
 C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\bin\Debug\net9.0\Lucene.Net.Sandbox.dll
+C:\Users\hamad\Documents\GitHub\Mental-Health-Portal\MentalHealthPortal\obj\Debug\net9.0\compressed\62bxmu890e-lbolwpc5i1.gz

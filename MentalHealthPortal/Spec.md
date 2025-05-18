@@ -88,7 +88,7 @@
     - [x] On document upload, after text extraction, add document content to the in-memory Lucene index.
         - Fields: `document_id` (generated unique ID), `filename`, `content` (extracted text), `doc_type`.
 - [ ] **Search UI & API (Session-Only):**
-    - [ ] Create a simple search UI (text input for keywords, optional filter for document type).
+    - [x] Create a simple search UI (text input for keywords, optional filter for document type).
     - [ ] Implement a Minimal API endpoint (e.g., `GET /api/search?keywords=...&docType=...`) that uses `IndexService` to query the `RAMDirectory`.
     - [ ] Display search results in a basic table format on the UI (e.g., FileName, DocType).
 - [ ] **Testing (MVP Workflow):**

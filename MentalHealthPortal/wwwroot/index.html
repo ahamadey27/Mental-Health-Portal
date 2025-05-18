@@ -60,6 +60,28 @@
             border: 1px solid #f5c6cb;
         }
     
+        /* Added styles for search */
+        .search-container {
+            margin-top: 30px;
+        }
+    
+        #searchResultsArea table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+    
+        #searchResultsArea th,
+        #searchResultsArea td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    
+        #searchResultsArea th {
+            background-color: #f2f2f2;
+        }
+    
         </style>
 </head>
 
@@ -74,6 +96,38 @@
             <input type="submit" value="Upload" /> </form>
         <!-- Form will go here -->
         <div id="messageArea" class="message" style="display:none;"></div><!-- For displaying messages -->
+    </div>
+    <!-- Search Section -->
+    <div class="container search-container">
+        <h2>Search Documents</h2>
+        <form id="searchForm">
+            <div>
+                <label for="searchTerm">Enter keyword(s):</label>
+                <input type="text" id="searchTerm" name="keywords" required />
+            </div>
+            <div>
+                <label for="docTypeFilter">Filter by Document Type (optional, e.g., PDF, DOCX):</label>
+                <input type="text" id="docTypeFilter" name="docTypeFilter" />
+            </div>
+            <input type="submit" value="Search" />
+        </form>
+        <div id="searchResultsArea" style="display:none;">
+            <h3>Search Results</h3>
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>Document ID</th>
+                        <th>File Name</th>
+                        <th>Type</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Results will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        <div id="searchMessageArea" class="message" style="display:none;"></div>
     </div>
     <script>
         const form = document.getElementById('uploadForm');
@@ -109,7 +163,7 @@
 
                 if (response.ok) {
                     const result = await response.json(); // Assuming server sends JSON back
-                    showMessage('File uploaded successfully! Stored as: ' + (result.storedFileName || 'N/A'), 'success');
+                    showMessage('File uploaded successfully! Stored as: ' + (result.documentId || 'N/A'), 'success');
                     form.reset(); // Clear the form
                 } else {
                     // Try to get a message from the server's JSON response
@@ -132,6 +186,71 @@
             messageArea.textContent = message;
             messageArea.className = 'message ' + type; // Add success or error class for styling
             messageArea.style.display = 'block';
+        }
+
+        // Search functionality
+        const searchForm = document.getElementById('searchForm');
+        const searchResultsArea = document.getElementById('searchResultsArea');
+        const resultsTableBody = document.querySelector('#resultsTable tbody');
+        const searchMessageArea = document.getElementById('searchMessageArea');
+
+        searchForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            searchResultsArea.style.display = 'none';
+            resultsTableBody.innerHTML = ''; // Clear previous results
+            searchMessageArea.style.display = 'none';
+            searchMessageArea.textContent = '';
+            searchMessageArea.className = 'message'; // Reset message area class
+
+            const keywords = document.getElementById('searchTerm').value;
+            const docTypeFilter = document.getElementById('docTypeFilter').value;
+
+            if (!keywords.trim()) {
+                showSearchMessage('Please enter a search term.', 'error');
+                return;
+            }
+
+            let query = `/api/search?keywords=${encodeURIComponent(keywords)}`;
+            if (docTypeFilter.trim()) {
+                query += `&docTypeFilter=${encodeURIComponent(docTypeFilter.trim())}`;
+            }
+
+            try {
+                const response = await fetch(query);
+                if (response.ok) {
+                    const results = await response.json();
+                    if (results.length > 0) {
+                        results.forEach(item => {
+                            const row = resultsTableBody.insertRow();
+                            row.insertCell().textContent = item.documentId;
+                            row.insertCell().textContent = item.fileName;
+                            row.insertCell().textContent = item.docType;
+                            row.insertCell().textContent = item.score.toFixed(5);
+                        });
+                        searchResultsArea.style.display = 'block';
+                    } else {
+                        showSearchMessage('No documents found matching your criteria.', 'success'); // Or 'info' if you prefer
+                    }
+                } else {
+                    let errorMessage = response.statusText;
+                    try {
+                        const errorResult = await response.json();
+                        errorMessage = errorResult.message || errorResult.title || errorMessage;
+                    } catch (e) {
+                        // Ignore if response is not JSON
+                    }
+                    showSearchMessage(`Search failed: ${errorMessage}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error during search:', error);
+                showSearchMessage('An error occurred during search. Please try again.', 'error');
+            }
+        });
+
+        function showSearchMessage(message, type) {
+            searchMessageArea.textContent = message;
+            searchMessageArea.className = 'message ' + type;
+            searchMessageArea.style.display = 'block';
         }
     </script>
 </body>
