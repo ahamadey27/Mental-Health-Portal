@@ -40,9 +40,22 @@ namespace MentalHealthPortal.Services
                             }
                             foreach (Page page in document.GetPages())
                             {
-                                string pageText = page.Text;
-                                // Log a snippet of the extracted text per page for debugging
-                                Console.WriteLine($"Extracted from {originalFileName} (Page {page.Number}): {pageText.Substring(0, Math.Min(pageText.Length, 200))}[...]");
+                                // Old logic:
+                                // string pageText = page.Text;
+                                // Console.WriteLine($"Extracted from {originalFileName} (Page {page.Number}): {pageText.Substring(0, Math.Min(pageText.Length, 200))}[...]");
+                                // textBuilder.Append(pageText);
+                                // textBuilder.AppendLine(); // Add new line between pages for readability
+
+                                // New logic: Iterate through words and add spaces
+                                var words = page.GetWords();
+                                StringBuilder pageTextBuilder = new StringBuilder();
+                                foreach (var word in words)
+                                {
+                                    pageTextBuilder.Append(word.Text).Append(" ");
+                                }
+                                string pageText = pageTextBuilder.ToString().Trim(); // Trim trailing space
+                                
+                                Console.WriteLine($"Extracted from {originalFileName} (Page {page.Number}, {words.Count()} words): {pageText.Substring(0, Math.Min(pageText.Length, 200))}[...]");
                                 textBuilder.Append(pageText);
                                 textBuilder.AppendLine(); // Add new line between pages for readability
                             }
