@@ -106,7 +106,38 @@
 ## Phase 3: Basic AI Analysis Integration (Out of Scope for MVP)
 - This phase, involving ML.NET, Ollama, Semantic Kernel, and persistent storage (SQLite, File System for documents/index), is deferred.
 
----
+## Phase 4: Azure Deployment (Free Tier) (Post-MVP)
+- **Goal:** Deploy the existing session-only MVP application to Microsoft Azure, utilizing free-tier services where possible.
+- **Azure Account Setup:**
+    - [ ] Ensure an Azure account with access to free services is available.
+- **Azure App Service:**
+    - [ ] Create a new Azure App Service instance.
+        - Choose the Free (F1) pricing tier.
+        - Select the appropriate runtime stack for ASP.NET Core (e.g., .NET 8 or .NET 9).
+        - Configure the region.
+- **Deployment Method:**
+    - [ ] Choose and configure a deployment method:
+        - Option 1: Visual Studio Publish.
+        - Option 2: VS Code Azure App Service Extension.
+        - Option 3: GitHub Actions for CI/CD (if code is on GitHub).
+        - Option 4: Azure DevOps Pipelines.
+- **Application Configuration on Azure:**
+    - [ ] Review and set any necessary environment variables or application settings in the Azure portal for the App Service (though for the current MVP, default settings might suffice).
+    - [ ] Ensure the application is configured to run correctly in Azure's environment (e.g., port bindings are handled by App Service).
+- **Deployment:**
+    - [ ] Deploy the application to the configured Azure App Service.
+- **Testing on Azure:**
+    - [ ] Access the application via its Azure-provided URL (e.g., `your-app-name.azurewebsites.net`).
+    - [ ] Test all MVP functionalities:
+        - Document upload (PDF, DOCX).
+        - Search functionality.
+        - View links for uploaded documents.
+    - [ ] Verify that the session-only behavior is maintained (data clears on app restart, which can occur on Azure App Service Free tier).
+- **Considerations for Free Tier:**
+    - Be aware of the limitations of the Azure Free Tier (e.g., CPU/memory quotas, shared infrastructure, no custom domains without cost, app may go idle).
+    - The `wwwroot/session_uploads` directory used for temporary file storage will work, but files will be lost if the App Service instance recycles or moves, which aligns with the session-only nature of the MVP.
+
+--- 
 
 ## Key Changes for MVP (from original spec):
 *   **No Database:** SQLite and EF Core are removed. Metadata is transient.

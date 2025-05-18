@@ -23,7 +23,19 @@ builder.Services.AddHostedService<MentalHealthPortal.Services.QueuedHostedServic
 
 builder.Services.AddSingleton<MentalHealthPortal.Services.IndexService>();
 
-
+// Ensure session_uploads directory exists before building the app
+var wwwRootPath = builder.Environment.WebRootPath;
+if (string.IsNullOrEmpty(wwwRootPath)) // Handle cases where WebRootPath might be null before full configuration
+{
+    // Attempt to construct it based on ContentRootPath if wwwroot is the conventional subfolder
+    wwwRootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+}
+var sessionUploadsPath = Path.Combine(wwwRootPath, "session_uploads");
+if (!Directory.Exists(sessionUploadsPath))
+{
+    Directory.CreateDirectory(sessionUploadsPath);
+    Console.WriteLine($"Created directory: {sessionUploadsPath}"); // Added for confirmation
+}
 
 var app = builder.Build();
 
