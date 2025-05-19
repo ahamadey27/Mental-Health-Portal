@@ -117,10 +117,10 @@
         - Configure the region.
 - **Deployment Method:**
     - [ ] Choose and configure a deployment method:
-        - Option 1: Visual Studio Publish.
-        - Option 2: VS Code Azure App Service Extension.
-        - Option 3: GitHub Actions for CI/CD (if code is on GitHub).
-        - Option 4: Azure DevOps Pipelines.
+        - [x] Option 1: Visual Studio Publish.
+        - [ ] Option 2: VS Code Azure App Service Extension.
+        - [ ] Option 3: GitHub Actions for CI/CD (if code is on GitHub).
+        - [ ] Option 4: Azure DevOps Pipelines.
 - **Application Configuration on Azure:**
     - [ ] Review and set any necessary environment variables or application settings in the Azure portal for the App Service (though for the current MVP, default settings might suffice).
     - [ ] Ensure the application is configured to run correctly in Azure's environment (e.g., port bindings are handled by App Service).
@@ -150,14 +150,14 @@
 
 ## General Notes
 - **Azure Specs**
-    - Subscription ab1bb24b-caa7-4d20-bf5f-e0b0be1ec9e9
-    - Resource Group MentalHealthPortal-RG
-    - Name mental-health-portal
-    - Secure unique default hostname Enabled
-    - Publish Code
-    - Runtime stack .NET 9 (STS)
+    - Subscription: ab1bb24b-caa7-4d20-bf5f-e0b0be1ec9e9
+    - Resource Group: MentalHealthPortal-RG
+    - Name: mental-health-portal
+    - Secure unique default hostname: Enabled
+    - Publish: Code
+    - Runtime: stack .NET 9 (STS)
     - App Service Plan (New)
-    - Name ASP-MentalHealthPortalRG-ba57
+    - Name: ASP-MentalHealthPortalRG-ba57
     - Operating System Windows
     - Region Canada Central
     - SKU Free
