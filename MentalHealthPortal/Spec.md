@@ -91,12 +91,12 @@
     - [x] Create a simple search UI (text input for keywords, optional filter for document type).
     - [x] Implement a Minimal API endpoint (e.g., `GET /api/search?keywords=...&docType=...`) that uses `IndexService` to query the `RAMDirectory`.
     - [x] Display search results in a basic table format on the UI (e.g., FileName, DocType).
-- [ ] **Testing (MVP Workflow):**
-    - [ ] Test document upload for PDF and DOCX files.
-    - [ ] Verify success messages and unique identifiers.
-    - [ ] Test search functionality with keywords expected to be in uploaded documents.
-    - [ ] Verify search results are displayed correctly.
-    - [ ] Verify data is session-only (restarting application clears documents and index).
+- [x] **Testing (MVP Workflow):**
+    - [x] Test document upload for PDF and DOCX files.
+    - [x] Verify success messages and unique identifiers.
+    - [x] Test search functionality with keywords expected to be in uploaded documents.
+    - [x] Verify search results are displayed correctly.
+    - [x] Verify data is session-only (restarting application clears documents and index).
 
 ## Phase 2: UI/UX Enhancements (Post-MVP, Optional)
 - Improve visual styling of the UI.

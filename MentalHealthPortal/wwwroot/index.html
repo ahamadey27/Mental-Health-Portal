@@ -3,49 +3,93 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Document Upload</title>
+    <title>Mental Health Portal - Document Upload</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .page-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
         }
     
         .container {
-            max-width: 500px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            max-width: 600px; /* Slightly wider for better layout */
+            margin: 20px auto; /* Centering and spacing */
+            padding: 25px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px; /* Softer corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 0;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
     
         label {
             display: block;
             margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
         }
     
-        input[type="file"] {
+        input[type="file"],
+        input[type="text"] {
+            width: calc(100% - 22px); /* Full width minus padding and border */
+            padding: 10px;
             margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Important for width calculation */
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="file"] {
+            padding: 5px; /* Specific padding for file input */
+        }
+
+        input[type="file"]:focus,
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
         }
     
         input[type="submit"] {
-            padding: 10px 15px;
+            padding: 12px 20px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
     
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
+
+        input[type="submit"]:active {
+            background-color: #004085;
+        }
     
-        #messageArea {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 3px;
-            display: none;
-            /* Hidden by default */
+        #messageArea, #searchMessageArea {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 4px;
+            display: none; 
         }
     
         .success {
@@ -60,7 +104,6 @@
             border: 1px solid #f5c6cb;
         }
     
-        /* Added styles for search */
         .search-container {
             margin-top: 30px;
         }
@@ -68,24 +111,45 @@
         #searchResultsArea table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
     
         #searchResultsArea th,
         #searchResultsArea td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 12px; /* Increased padding */
             text-align: left;
         }
     
         #searchResultsArea th {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa; /* Lighter header */
+            color: #333;
+            font-weight: bold;
+        }
+
+        #searchResultsArea tbody tr:nth-child(even) {
+            background-color: #f9f9f9; /* Zebra striping */
+        }
+
+        #searchResultsArea tbody tr:hover {
+            background-color: #f1f1f1; /* Hover effect */
+        }
+
+        #searchResultsArea td a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        #searchResultsArea td a:hover {
+            text-decoration: underline;
         }
     
-        </style>
+    </style>
 </head>
 
 <body>
+    <h1 class="page-title">Mental Health Document Portal</h1>
     <div class="container">
         <h2>Upload Document</h2>
         <form id="uploadForm" action="/api/documents/upload" method="post" enctype="multipart/form-data">
