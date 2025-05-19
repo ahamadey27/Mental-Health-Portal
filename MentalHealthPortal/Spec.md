@@ -99,9 +99,9 @@
     - [x] Verify data is session-only (restarting application clears documents and index).
 
 ## Phase 2: UI/UX Enhancements (Post-MVP, Optional)
-- Improve visual styling of the UI.
-- Add more robust error handling and user feedback.
-- Implement client-side validation for uploads.
+    - [x] Improve visual styling of the UI.
+    - [x] Add more robust error handling and user feedback.
+    - [x] Implement client-side validation for uploads.
 
 ## Phase 3: Basic AI Analysis Integration (Out of Scope for MVP)
 - This phase, involving ML.NET, Ollama, Semantic Kernel, and persistent storage (SQLite, File System for documents/index), is deferred.
@@ -109,9 +109,9 @@
 ## Phase 4: Azure Deployment (Free Tier) (Post-MVP)
 - **Goal:** Deploy the existing session-only MVP application to Microsoft Azure, utilizing free-tier services where possible.
 - **Azure Account Setup:**
-    - [ ] Ensure an Azure account with access to free services is available.
+    - [x] Ensure an Azure account with access to free services is available.
 - **Azure App Service:**
-    - [ ] Create a new Azure App Service instance.
+    - [x] Create a new Azure App Service instance.
         - Choose the Free (F1) pricing tier.
         - Select the appropriate runtime stack for ASP.NET Core (e.g., .NET 8 or .NET 9).
         - Configure the region.
@@ -147,3 +147,20 @@
 *   **No AI Features:** ML.NET, Ollama, Semantic Kernel integration is out of scope.
 *   **Simplified `DocumentMetadata`:** The model is simplified and used for transient data transfer, not persistence.
 *   **Focus:** Core ASP.NET, file upload, text extraction, and basic in-memory Lucene search.
+
+## General Notes
+- **Azure Specs**
+    - Subscription ab1bb24b-caa7-4d20-bf5f-e0b0be1ec9e9
+    - Resource Group MentalHealthPortal-RG
+    - Name mental-health-portal
+    - Secure unique default hostname Enabled
+    - Publish Code
+    - Runtime stack .NET 9 (STS)
+    - App Service Plan (New)
+    - Name ASP-MentalHealthPortalRG-ba57
+    - Operating System Windows
+    - Region Canada Central
+    - SKU Free
+    - ACU Shared infrastructure
+    - Memory 1 GB memory
+    - Monitor + secure
